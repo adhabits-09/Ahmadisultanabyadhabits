@@ -924,12 +924,6 @@
                 console.error('Error sending to Sheets:', error);
             });
 
-            // ---- META PIXEL TRACKING ----
-            // ONLY Contact event to keep lead cost LOW
-            if (typeof fbq !== 'undefined') {
-                fbq('track', 'Contact');
-            }
-
             // ---- SIMPLIFIED WHATSAPP MESSAGE (Policy Compliant) ----
             const message = encodeURIComponent("I'm ready to start my skill journey. Please share next steps.");
             
