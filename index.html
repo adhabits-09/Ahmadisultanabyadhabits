@@ -464,6 +464,7 @@
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
 
@@ -883,12 +884,9 @@
         formBackdrop.addEventListener('click', closeForm);
         closeFormBtn.addEventListener('click', closeForm);
 
-        document.addEventListener('click', (e) => {
-            const trigger = e.target.closest('.open-any');
-            if(trigger && !trigger.closest('#formContainer')) {
-                e.preventDefault();
-                openForm(trigger.getAttribute('data-source') || 'Website');
-            }
+        document.addEventListener('click',(e)=>{
+            const trigger=e.target.closest('.open-any');
+            if(trigger&&!trigger.closest('#formContainer')){e.preventDefault();openForm(trigger.dataset.source||'Website');}
         });
 
         // ===== FORM SUBMISSION: GOOGLE SHEETS + WHATSAPP =====
