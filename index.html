@@ -892,55 +892,66 @@
         });
 
         // ===== FORM SUBMISSION: GOOGLE SHEETS + WHATSAPP =====
-        mainForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const name = document.getElementById('inp_name').value.trim();
-            const phone = document.getElementById('inp_phone').value.replace(/\D/g, '');
-            const age = document.getElementById('inp_age').value;
-            const gender = document.getElementById('inp_gender').value;
-            const profession = document.getElementById('inp_profession').value;
-            const source = sourceInfo.value || 'Website';
+        mainForm.addEventListener('submit',function(e){
+  e.preventDefault();
 
-            if(!name || phone.length < 10 || !age || !gender || !profession) {
-                alert('Please fill all fields correctly with a valid 10-digit phone number.');
-                return;
-            }
+  const name=document.getElementById('inp_name').value.trim();
+  const phone=document.getElementById('inp_phone').value.replace(/\D/g,'');
+  const age=document.getElementById('inp_age').value;
+  const gender=document.getElementById('inp_gender').value;
+  const profession=document.getElementById('inp_profession').value;
+  const source=sourceInfo.value || 'Website';
 
-            // ---- SEND DATA TO GOOGLE SHEET (Background Process) ----
-            const formData = new FormData();
-            formData.append('Timestamp', new Date().toLocaleString());
-            formData.append('Name', name);
-            formData.append('Phone', phone);
-            formData.append('Age', age);
-            formData.append('Gender', gender);
-            formData.append('Profession', profession);
-            formData.append('Source', source);
+  if(!name||phone.length<10||!age||!gender||!profession){
+    alert('Please fill all fields correctly with a valid 10-digit phone number.');
+    return;
+  }
 
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: formData,
-                mode: 'no-cors'
-            }).then(() => {
-                console.log('Data saved to Google Sheet');
-            }).catch(error => {
-                console.error('Sheet error:', error);
-            });
+  // Google Sheet Data - EXACT COLUMN MATCH
+  const formData = new FormData();
+  formData.append('Timestamp', new Date().toLocaleString());
+  formData.append('Name', name);
+  formData.append('Phone', phone);
+  formData.append('Age', age);
+  formData.append('Gender', gender);
+  formData.append('Profession', profession);
+  formData.append('Source', source);
 
-            // Meta Pixel Contact Event
-            if(typeof fbq !== 'undefined'){
-                fbq('track', 'Contact');
-            }
+  // Send to Google Sheets
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: formData,
+    mode: 'no-cors'
+  }).then(() => {
+    console.log('Data saved to Google Sheet');
+  }).catch((error) => {
+    console.error('Sheet error:', error);
+  });
 
-            // WhatsApp redirect with detailed message
-            const message = encodeURIComponent(
-                `Hello Ma'am,\n\nI am interested in your women-only program. Here are my details:\n\nName: ${name}\nPhone: ${phone}\nAge: ${age}\nGender: ${gender}\nProfession: ${profession}\n\nPlease share next steps. Thank you!`
-            );
+  // Meta Pixel Contact Event
+  if(typeof fbq !== 'undefined'){
+    fbq('track', 'Contact');
+  }
 
-            window.open(`https://wa.me/${WA_NUMBER_INT}?text=${message}`, '_blank');
+  // WhatsApp redirect
+  const message = encodeURIComponent(
+    `Hello Ma'am,
 
-            // Close form
-            closeForm();
-        });
+I am interested in your women-only program. Here are my details:
+
+Name: ${name}
+Phone: ${phone}
+Age: ${age}
+Gender: ${gender}
+Profession: ${profession}
+
+Please share next steps. Thank you!`
+  );
+
+  window.open(`https://wa.me/${WA_NUMBER_INT}?text=${message}`, '_blank');
+
+  closeForm();
+});
 
         document.addEventListener('keydown', (e) => {
             if(e.key === 'Escape') closeForm();
