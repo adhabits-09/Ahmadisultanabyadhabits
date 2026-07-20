@@ -463,6 +463,7 @@
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
 
@@ -898,38 +899,45 @@
             const age = document.getElementById('inp_age').value;
             const gender = document.getElementById('inp_gender').value;
             const profession = document.getElementById('inp_profession').value;
+            const source = sourceInfo.value || 'Website';
 
-            if(!name || phone.length < 6 || !age || !gender || !profession) {
-                alert('Please fill all fields correctly.');
+            if(!name || phone.length < 10 || !age || !gender || !profession) {
+                alert('Please fill all fields correctly with a valid 10-digit phone number.');
                 return;
             }
 
             // ---- SEND DATA TO GOOGLE SHEET (Background Process) ----
             const formData = new FormData();
-            formData.append('name', name);
-            formData.append('phone', phone);
-            formData.append('age', age);
-            formData.append('gender', gender);
-            formData.append('profession', profession);
-            formData.append('source', sourceInfo.value || 'Website');
-            formData.append('timestamp', new Date().toISOString());
+            formData.append('Timestamp', new Date().toLocaleString());
+            formData.append('Name', name);
+            formData.append('Phone', phone);
+            formData.append('Age', age);
+            formData.append('Gender', gender);
+            formData.append('Profession', profession);
+            formData.append('Source', source);
 
             fetch(SCRIPT_URL, {
                 method: 'POST',
                 body: formData,
                 mode: 'no-cors'
             }).then(() => {
-                console.log('Data sent to Google Sheets successfully');
+                console.log('Data saved to Google Sheet');
             }).catch(error => {
-                console.error('Error sending to Sheets:', error);
+                console.error('Sheet error:', error);
             });
 
-            // ---- SIMPLIFIED WHATSAPP MESSAGE (Policy Compliant) ----
-            const message = encodeURIComponent("I'm ready to start my skill journey. Please share next steps.");
-            
-            // Open WhatsApp with simplified message
+            // Meta Pixel Contact Event
+            if(typeof fbq !== 'undefined'){
+                fbq('track', 'Contact');
+            }
+
+            // WhatsApp redirect with detailed message
+            const message = encodeURIComponent(
+                `Hello Ma'am,\n\nI am interested in your women-only program. Here are my details:\n\nName: ${name}\nPhone: ${phone}\nAge: ${age}\nGender: ${gender}\nProfession: ${profession}\n\nPlease share next steps. Thank you!`
+            );
+
             window.open(`https://wa.me/${WA_NUMBER_INT}?text=${message}`, '_blank');
-            
+
             // Close form
             closeForm();
         });
