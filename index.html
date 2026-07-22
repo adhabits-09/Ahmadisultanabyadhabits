@@ -465,6 +465,7 @@
 <base target="_blank">
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
 
@@ -890,22 +891,56 @@
         });
 
         // ===== FORM SUBMISSION: GOOGLE SHEETS + WHATSAPP =====
-        mainForm.addEventListener('submit',(e)=>{
-        e.preventDefault();
-        const name=document.getElementById('inp_name').value.trim();
-        const phone=document.getElementById('inp_phone').value.replace(/\D/g,'');
-        const age=document.getElementById('inp_age').value;
-        const gender=document.getElementById('inp_gender').value;
-        const profession=document.getElementById('inp_profession').value;
-        if(!name||phone.length<6||!age||!gender||!profession){alert('Please fill all fields correctly.');return;}
-        const formData=new FormData();
-        formData.append('name',name);formData.append('phone',phone);formData.append('age',age);formData.append('gender',gender);formData.append('profession',profession);formData.append('source',sourceInfo.value);formData.append('timestamp',new Date().toISOString());
-        fetch(SCRIPT_URL,{method:'POST',body:formData,mode:'no-cors'}).catch(()=>{});
-        const msg=encodeURIComponent('I am interested in this work');
-        if(typeof fbq!=='undefined'){fbq('track','Contact');}
-        window.open(`https://wa.me/917330824690?text=${msg}`,'_blank');
-        closeForm();
-    });
+        mainForm.addEventListener('submit',function(e){
+  e.preventDefault();
+
+  const name=document.getElementById('inp_name').value.trim();
+  const phone=document.getElementById('inp_phone').value.replace(/\D/g,'');
+  const age=document.getElementById('inp_age').value;
+  const gender=document.getElementById('inp_gender').value;
+  const profession=document.getElementById('inp_profession').value;
+  const source=sourceInfo.value || 'Website';
+
+  if(!name||phone.length<10||!age||!gender||!profession){
+    alert('Please fill all fields correctly with a valid 10-digit phone number.');
+    return;
+  }
+
+  // Google Sheet Data - EXACT COLUMN MATCH
+  const formData = new FormData();
+  formData.append('Timestamp', new Date().toLocaleString());
+  formData.append('Name', name);
+  formData.append('Phone', phone);
+  formData.append('Age', age);
+  formData.append('Gender', gender);
+  formData.append('Profession', profession);
+  formData.append('Source', source);
+
+  // Send to Google Sheets
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: formData,
+    mode: 'no-cors'
+  }).then(() => {
+    console.log('Data saved to Google Sheet');
+  }).catch((error) => {
+    console.error('Sheet error:', error);
+  });
+
+  // Meta Pixel Contact Event
+  if(typeof fbq !== 'undefined'){
+    fbq('track', 'Contact');
+  }
+
+  // WhatsApp redirect
+  const message = encodeURIComponent(
+    `Hello Ma'am,\n\nI am interested in your women-only program. Here are my details:\n\nName: ${name}\nPhone: ${phone}\nAge: ${age}\nGender: ${gender}\nProfession: ${profession}\n\nPlease share next steps. Thank you!`
+  );
+
+  window.open(`https://wa.me/${WA_NUMBER_INT}?text=${message}`, '_blank');
+
+  closeForm();
+});
 
         document.addEventListener('keydown', (e) => {
             if(e.key === 'Escape') closeForm();
